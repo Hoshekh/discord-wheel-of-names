@@ -239,18 +239,23 @@ export async function execute(interaction) {
         return;
       }
 
-      const winnerIndex =
-        Math.floor(Math.random() * wheel.entries.length);
+const winnerIndex =
+  Math.floor(Math.random() * wheel.entries.length);
 
-      const winner =
-        wheel.entries[winnerIndex];
+const winner =
+  wheel.entries[winnerIndex];
 
-      const gifBuffer =
-        await generateWheelGIF(
-          wheel.entries,
-          winnerIndex,
-          wheel.color
-        );
+const gifBuffer =
+  await generateWheelGIF(
+    wheel.entries,
+    {
+      colorPalette: wheel.color,
+      winner: winner,
+      duration: 3000,
+      fps: 20,
+      spinRevolutions: 5
+    }
+  );
 
       await recordSpin(
         wheel.id,
