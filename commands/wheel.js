@@ -8,34 +8,37 @@ import { generateWheelGIF } from '../wheel-generator.js';
 
 import {
   getWheels,
-  getWheel,
   createWheel,
   deleteWheel,
   recordSpin
 } from '../wheel-storage.js';
 
+
 export const data = new SlashCommandBuilder()
   .setName('wheel')
   .setDescription('Manage and spin saved wheels')
 
+  // LIST
   .addSubcommand(subcommand =>
     subcommand
       .setName('list')
       .setDescription('List all saved wheels')
   )
 
-.addSubcommand(subcommand =>
-  subcommand
-    .setName('spin')
-    .setDescription('Spin a saved wheel')
-    .addStringOption(option =>
-      option
-        .setName('name')
-        .setDescription('Name of the wheel to spin')
-        .setRequired(true)
-    )
+  // SPIN
+  .addSubcommand(subcommand =>
+    subcommand
+      .setName('spin')
+      .setDescription('Spin a saved wheel')
+      .addStringOption(option =>
+        option
+          .setName('name')
+          .setDescription('Name of the wheel to spin')
+          .setRequired(true)
+      )
   )
 
+  // CREATE
   .addSubcommand(subcommand =>
     subcommand
       .setName('create')
@@ -69,29 +72,34 @@ export const data = new SlashCommandBuilder()
       )
   )
 
+  // DELETE
   .addSubcommand(subcommand =>
     subcommand
       .setName('delete')
       .setDescription('Delete a saved wheel')
+
       .addStringOption(option =>
         option
-          .setName('wheel_id')
-          .setDescription('The wheel ID to delete')
+          .setName('name')
+          .setDescription('Name of the wheel to delete')
           .setRequired(true)
       )
   )
 
+  // INFO
   .addSubcommand(subcommand =>
     subcommand
       .setName('info')
       .setDescription('View information about a saved wheel')
+
       .addStringOption(option =>
         option
-          .setName('wheel_id')
-          .setDescription('The wheel ID to view')
+          .setName('name')
+          .setDescription('Name of the wheel')
           .setRequired(true)
       )
   );
+
 
 export async function execute(interaction) {
 
@@ -108,6 +116,7 @@ export async function execute(interaction) {
       const wheels = await getWheels();
 
       if (wheels.length === 0) {
+
         await interaction.reply({
           content:
             'You do not have any saved wheels yet!\n\n' +
@@ -124,8 +133,8 @@ export async function execute(interaction) {
         .setDescription(
           wheels.map((wheel, index) =>
             `**${index + 1}. ${wheel.name}**\n` +
-            `ID: \`${wheel.id}\`\n` +
-            `Entries: ${wheel.entries.length}`
+            `Entries: ${wheel.entries.length}\n` +
+            `Color: ${wheel.color || 'uplup'}`
           ).join('\n\n')
         );
 
@@ -143,7 +152,8 @@ export async function execute(interaction) {
 
     if (subcommand === 'create') {
 
-      const name = interaction.options.getString('name');
+      const name =
+        interaction.options.getString('name');
 
       const entriesString =
         interaction.options.getString('entries');
@@ -156,6 +166,7 @@ export async function execute(interaction) {
         .map(entry => entry.trim())
         .filter(entry => entry.length > 0);
 
+
       if (entries.length < 2) {
 
         await interaction.reply({
@@ -166,6 +177,7 @@ export async function execute(interaction) {
 
         return;
       }
+
 
       if (entries.length > 100) {
 
@@ -178,8 +190,41 @@ export async function execute(interaction) {
         return;
       }
 
+
+      // Check if a wheel with this name already exists
+
+      const existingWheels =
+        await getWheels();
+
+      const alreadyExists =
+        existingWheels.some(
+          wheel =>
+            wheel.name.toLowerCase() ===
+            name.toLowerCase()
+        );
+
+
+      if (alreadyExists) {
+
+        await interaction.reply({
+          content:
+            `❌ A wheel named **${name}** already exists.`,
+          ephemeral: true
+        });
+
+        return;
+      }
+
+
+      // Create the wheel
+
       const wheel =
-        await createWheel(name, entries, color);
+        await createWheel(
+          name,
+          entries,
+          color
+        );
+
 
       const embed = new EmbedBuilder()
         .setColor(0x4CAF50)
@@ -191,20 +236,21 @@ export async function execute(interaction) {
             inline: true
           },
           {
-            name: 'ID',
-            value: `\`${wheel.id}\``,
+            name: 'Entries',
+            value: `${wheel.entries.length}`,
             inline: true
           },
           {
-            name: 'Entries',
-            value: `${wheel.entries.length}`,
+            name: 'Color',
+            value: wheel.color || 'uplup',
             inline: true
           }
         )
         .setDescription(
           'Your wheel is now saved directly in the bot.\n\n' +
-          `Use \`/wheel spin wheel_id:${wheel.id}\` to spin it!`
+          `Use \`/wheel spin name:${wheel.name}\` to spin it!`
         );
+
 
       await interaction.reply({
         embeds: [embed]
@@ -222,17 +268,22 @@ export async function execute(interaction) {
 
       await interaction.deferReply();
 
-const wheelName =
-  interaction.options.getString('name');
 
-const wheels =
-  await getWheels();
+      const wheelName =
+        interaction.options.getString('name');
 
-const wheel =
-  wheels.find(
-    wheel =>
-      wheel.name.toLowerCase() === wheelName.toLowerCase()
-  );
+
+      const wheels =
+        await getWheels();
+
+
+      const wheel =
+        wheels.find(
+          wheel =>
+            wheel.name.toLowerCase() ===
+            wheelName.toLowerCase()
+        );
+
 
       if (!wheel) {
 
@@ -245,28 +296,41 @@ const wheel =
         return;
       }
 
-const winnerIndex =
-  Math.floor(Math.random() * wheel.entries.length);
 
-const winner =
-  wheel.entries[winnerIndex];
+      const winnerIndex =
+        Math.floor(
+          Math.random() *
+          wheel.entries.length
+        );
 
-const gifBuffer =
-  await generateWheelGIF(
-    wheel.entries,
-    {
-      colorPalette: wheel.color,
-      winner: winner,
-      duration: 3000,
-      fps: 20,
-      spinRevolutions: 5
-    }
-  );
+
+      const winner =
+        wheel.entries[winnerIndex];
+
+
+      const gifBuffer =
+        await generateWheelGIF(
+          wheel.entries,
+          {
+            colorPalette:
+              wheel.color || 'uplup',
+
+            winner,
+
+            duration: 3000,
+
+            fps: 20,
+
+            spinRevolutions: 5
+          }
+        );
+
 
       await recordSpin(
         wheel.id,
         winner
       );
+
 
       const attachment =
         new AttachmentBuilder(
@@ -276,6 +340,7 @@ const gifBuffer =
           }
         );
 
+
       const embed = new EmbedBuilder()
         .setColor(0x6C60D7)
         .setTitle(`🎡 ${wheel.name}`)
@@ -283,10 +348,15 @@ const gifBuffer =
           `✨ **The wheel has chosen:**\n\n` +
           `# ${winner}`
         )
-        .setImage('attachment://wheel-spin.gif')
+        .setImage(
+          'attachment://wheel-spin.gif'
+        )
         .setFooter({
-          text: `Saved wheel • ${wheel.entries.length} entries`
+          text:
+            `Saved wheel • ` +
+            `${wheel.entries.length} entries`
         });
+
 
       await interaction.editReply({
         embeds: [embed],
@@ -303,53 +373,73 @@ const gifBuffer =
 
     if (subcommand === 'info') {
 
-      const wheelId =
-        interaction.options.getString('wheel_id');
+      const wheelName =
+        interaction.options.getString('name');
+
+
+      const wheels =
+        await getWheels();
+
 
       const wheel =
-        await getWheel(wheelId);
+        wheels.find(
+          wheel =>
+            wheel.name.toLowerCase() ===
+            wheelName.toLowerCase()
+        );
+
 
       if (!wheel) {
 
         await interaction.reply({
-          content: '❌ Wheel not found.',
+          content:
+            '❌ Wheel not found.',
           ephemeral: true
         });
 
         return;
       }
 
+
       const preview =
         wheel.entries
           .slice(0, 20)
-          .map((entry, index) =>
-            `${index + 1}. ${entry}`
+          .map(
+            (entry, index) =>
+              `${index + 1}. ${entry}`
           )
           .join('\n');
+
 
       const embed = new EmbedBuilder()
         .setColor(0x6C60D7)
         .setTitle(`🎡 ${wheel.name}`)
         .addFields(
           {
-            name: 'Wheel ID',
-            value: `\`${wheel.id}\``
-          },
-          {
             name: 'Entries',
-            value: `${wheel.entries.length}`,
+            value:
+              `${wheel.entries.length}`,
             inline: true
           },
           {
             name: 'Spins',
-            value: `${wheel.spins.length}`,
+            value:
+              `${wheel.spins?.length || 0}`,
+            inline: true
+          },
+          {
+            name: 'Color',
+            value:
+              wheel.color || 'uplup',
             inline: true
           },
           {
             name: 'Preview',
-            value: preview
+            value:
+              preview || 'No entries'
           }
         );
+
 
       await interaction.reply({
         embeds: [embed]
@@ -365,29 +455,60 @@ const gifBuffer =
 
     if (subcommand === 'delete') {
 
-      const wheelId =
-        interaction.options.getString('wheel_id');
+      const wheelName =
+        interaction.options.getString('name');
 
-      const deleted =
-        await deleteWheel(wheelId);
 
-      if (!deleted) {
+      const wheels =
+        await getWheels();
+
+
+      const wheel =
+        wheels.find(
+          wheel =>
+            wheel.name.toLowerCase() ===
+            wheelName.toLowerCase()
+        );
+
+
+      if (!wheel) {
 
         await interaction.reply({
-          content: '❌ Wheel not found.',
+          content:
+            '❌ Wheel not found.',
           ephemeral: true
         });
 
         return;
       }
 
+
+      const deleted =
+        await deleteWheel(
+          wheel.id
+        );
+
+
+      if (!deleted) {
+
+        await interaction.reply({
+          content:
+            '❌ Unable to delete the wheel.',
+          ephemeral: true
+        });
+
+        return;
+      }
+
+
       await interaction.reply({
         content:
-          `🗑️ Wheel \`${wheelId}\` has been deleted.`
+          `🗑️ Wheel **${wheel.name}** has been deleted.`
       });
 
       return;
     }
+
 
   } catch (error) {
 
@@ -396,16 +517,29 @@ const gifBuffer =
       error
     );
 
+
     const message = {
       content:
         `❌ An error occurred: ${error.message}`,
       ephemeral: true
     };
 
-    if (interaction.deferred || interaction.replied) {
-      await interaction.editReply(message);
+
+    if (
+      interaction.deferred ||
+      interaction.replied
+    ) {
+
+      await interaction.editReply(
+        message
+      );
+
     } else {
-      await interaction.reply(message);
+
+      await interaction.reply(
+        message
+      );
+
     }
   }
 }
