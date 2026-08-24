@@ -14,11 +14,11 @@ GlobalFonts.registerFromPath(join(__dirname, 'fonts', 'Inter-Bold.ttf'), 'Inter'
 
 // Vibrant color palettes matching Uplup's theme
 const COLOR_PALETTES = {
-  vibrant: ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe'],
-  pastel: ['#FFB5E8', '#B5DEFF', '#BFFCC6', '#FFF5BA', '#FFCBC1', '#C4FAF8', '#E7FFAC', '#DCD3FF', '#FFC9DE', '#FFFFD1'],
-  sunset: ['#FF6B6B', '#FFA07A', '#FFD93D', '#6BCB77', '#4D96FF', '#9B59B6', '#FF8C94', '#91EAE4', '#FFB6B9', '#FAF3DD'],
-  ocean: ['#0077B6', '#00B4D8', '#90E0EF', '#CAF0F8', '#023E8A', '#0096C7', '#48CAE4', '#ADE8F4', '#03045E', '#00B4D8'],
-  uplup: ['#6C60D7', '#FC9E9E', '#4CAF50', '#FF9800', '#2196F3', '#9C27B0', '#00BCD4', '#E91E63', '#8BC34A', '#FF5722']
+  vibrant: ['#315b7d', '#4f7997', '#6d97b1', '#8cb7cb', '#add8e6', '#6699cc', '#84add7', '#a3c2e1', '#c1d6ec', '#e0eaf5'],
+  pastel: ['#315b7d', '#4f7997', '#6d97b1', '#8cb7cb', '#add8e6', '#6699cc', '#84add7', '#a3c2e1', '#c1d6ec', '#e0eaf5'],
+  sunset: ['#315b7d', '#4f7997', '#6d97b1', '#8cb7cb', '#add8e6', '#6699cc', '#84add7', '#a3c2e1', '#c1d6ec', '#e0eaf5'],
+  ocean: ['#315b7d', '#4f7997', '#6d97b1', '#8cb7cb', '#add8e6', '#6699cc', '#84add7', '#a3c2e1', '#c1d6ec', '#e0eaf5'],
+  uplup: ['#315b7d', '#4f7997', '#6d97b1', '#8cb7cb', '#add8e6', '#6699cc', '#84add7', '#a3c2e1', '#c1d6ec', '#e0eaf5']
 };
 
 /**
