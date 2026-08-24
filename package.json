@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@napi-rs/canvas": "^0.1.56",
+    "@napi-rs/canvas-linux-x64-gnu": "0.1.56",
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5",
     "gif-encoder-2": "^1.0.5"
