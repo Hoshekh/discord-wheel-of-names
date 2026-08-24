@@ -24,16 +24,16 @@ export const data = new SlashCommandBuilder()
       .setDescription('List all saved wheels')
   )
 
-  .addSubcommand(subcommand =>
-    subcommand
-      .setName('spin')
-      .setDescription('Spin a saved wheel')
-      .addStringOption(option =>
-        option
-          .setName('wheel_id')
-          .setDescription('The wheel ID to spin')
-          .setRequired(true)
-      )
+.addSubcommand(subcommand =>
+  subcommand
+    .setName('spin')
+    .setDescription('Spin a saved wheel')
+    .addStringOption(option =>
+      option
+        .setName('name')
+        .setDescription('Name of the wheel to spin')
+        .setRequired(true)
+    )
   )
 
   .addSubcommand(subcommand =>
@@ -222,11 +222,17 @@ export async function execute(interaction) {
 
       await interaction.deferReply();
 
-      const wheelId =
-        interaction.options.getString('wheel_id');
+const wheelName =
+  interaction.options.getString('name');
 
-      const wheel =
-        await getWheel(wheelId);
+const wheels =
+  await getWheels();
+
+const wheel =
+  wheels.find(
+    wheel =>
+      wheel.name.toLowerCase() === wheelName.toLowerCase()
+  );
 
       if (!wheel) {
 
