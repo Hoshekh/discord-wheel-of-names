@@ -179,18 +179,6 @@ export async function execute(interaction) {
       }
 
 
-      if (entries.length > 100) {
-
-        await interaction.reply({
-          content:
-            '❌ A wheel can contain a maximum of **100 entries**.',
-          ephemeral: true
-        });
-
-        return;
-      }
-
-
       // Check if a wheel with this name already exists
 
       const existingWheels =
