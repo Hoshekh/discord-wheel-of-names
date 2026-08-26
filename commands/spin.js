@@ -34,6 +34,7 @@ export const data = new SlashCommandBuilder()
           )
       )
   )
+  
   .addSubcommand(subcommand =>
     subcommand
       .setName('custom')
