@@ -218,12 +218,6 @@ export async function execute(interaction, uplupAPI) {
       return;
     }
 
-    // Hard cap at 100 for performance (GIF rendering)
-    if (entries.length > 100) {
-      entries = entries.slice(0, 100);
-      wheelName += ' (Limited to 100)';
-    }
-
     // Pick a random winner
     const winnerIndex = Math.floor(Math.random() * entries.length);
     const winner = entries[winnerIndex];
